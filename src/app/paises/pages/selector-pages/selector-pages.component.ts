@@ -14,10 +14,10 @@ export class SelectorPagesComponent implements OnInit {
 
   regiones: string[] = [];
   paisesSeleccionados: IPaisSmall[] = [];
-  // fronteras: string[] = [];
-  fronteras : IPaisSmall[] = []
+  fronteras: IPaisSmall[] = []
 
   //UX
+  //mostar aviso mientras reliza la consulta al endpoint
   cargando: boolean = false;
 
   constructor(
@@ -32,9 +32,9 @@ export class SelectorPagesComponent implements OnInit {
     this.miFormulario.get('region')?.valueChanges
       .pipe(
         tap(_ => {
-          //El guion bajo representa el dato que se obtendra en la linea 29, en este caso 
+          //El guion bajo representa el dato que se obtendra, en este caso 
           //se obtiene la region seleccionada por el usuario, yo no nececito ocupar este valor 
-          //y es por esto que por convencion se declara _ a una variable que no usarás.
+          //y es por esto que por convencion se declara "_" o "()" a una variable que no usarás.
           // console.log(_)
           //necesito  purgar este formGroup para cuando el usuario cambia de continente y el pais no coincide con 
           //el continente
@@ -55,18 +55,24 @@ export class SelectorPagesComponent implements OnInit {
         tap((_) => {
           this.fronteras = [];
           this.miFormulario.get('frontera')?.reset('');
-          this.cargando = true; 
+          this.cargando = true;
         }),
+
         switchMap(alphaCode => this.paisesService.buscarPaisPorAlpha3Code(alphaCode)
         ),
-        switchMap( pais => this.paisesService.getPaisesPorBordes(pais?.borders!) )
+
+        tap(pais => {
+          if (pais?.borders.length === 0) {
+            this.cargando = false;
+          }
+        }
+
+        ),
+        switchMap(pais => this.paisesService.getPaisesPorBordes(pais?.borders!))
       )
       .subscribe(pais => {
-        // this.fronteras = pais?.borders || [];
-        this.fronteras = pais;
-        // console.log(pais)
+        this.fronteras = pais || [];
         this.cargando = false;
-        
       })
 
   }
@@ -80,9 +86,5 @@ export class SelectorPagesComponent implements OnInit {
 
   enviarFormulario() {
     console.log('Enviando Formulario');
-    // const region = this.miFormulario.get('region')?.value; 
-    // console.log(region);
-
-
   }
 }

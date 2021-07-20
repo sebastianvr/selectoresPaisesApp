@@ -19,7 +19,7 @@
             </div>
 
             <div
-                *ngIf="cargando" 
+                *ngIf="cargando && paisesSeleccionados.length === 0" 
                 class="row">
                 <div class="col">
                     <div class="alert alert-primary">
